@@ -1,7 +1,7 @@
 # JSF
 Bootstrappable JSON Schema form generation
 
-** WARNING: Seriously slow work in progress **
+**WARNING: Seriously slow work in progress**
 
 The idea is if:
 * you have a thing that can generate a form that outputs data to **any** schema given that schema;
