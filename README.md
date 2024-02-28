@@ -14,7 +14,7 @@ This is all part of my grand plan which has been simmering for over a decade now
 
 ## Installation
 
-It's a standard empty [`bun.sh`](`https://bun.sh`) TypeScript project just to get me up and running quickly
+It's a standard empty [`bun.sh`](https://bun.sh) TypeScript project just to get me up and running quickly
 To install dependencies:
 
 ```bash
