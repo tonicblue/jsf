@@ -17,15 +17,15 @@ export default function renderAllOf ({ root, schema, pathStack }: Frame) {
 
   pathStack.pop();
 
-  return /*html*/dedent`
+  return dedent/*html*/`
     ${c(schema.$allOfBeforeBegin)}
-    <div ${renderAttributes(schema.$allOf)}>
+    <fieldset jsf-all-of ${renderAttributes(schema.$allOf)}>
       ${j(
         schema.$allOfAfterBegin,
         html.join(''),
         schema.$allOfBeforeEnd
       )}
-    </div>
+    </fieldset>
     ${c(schema.$allOfAfterEnd)}
   `;
 }

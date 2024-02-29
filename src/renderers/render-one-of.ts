@@ -17,15 +17,15 @@ export default function renderOneOf ({ root, schema, pathStack }: Frame) {
 
   pathStack.pop();
 
-  return /*html*/dedent`
+  return dedent/*html*/`
     ${c(schema.$oneOfBeforeBegin)}
-    <div ${renderAttributes(schema.$oneOf)}>
+    <fieldset jsf-one-of ${renderAttributes(schema.$oneOf)}>
       ${j(
         schema.$oneOfAfterBegin,
         html.join(''),
         schema.$oneOfBeforeEnd
       )}
-    </div>
+    </fieldset>
     ${c(schema.$oneOfAfterEnd)}
   `;
 }

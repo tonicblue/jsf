@@ -22,7 +22,7 @@ export default function renderProperties ({ root, schema, pathStack }: Frame) {
   };
   pathStack.pop();
 
-  return /*html*/dedent`
+  return dedent/*html*/`
     ${c(schema.$propertiesBeforeBegin)}
     <fieldset ${renderAttributes($properties)}>
       ${j(

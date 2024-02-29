@@ -27,7 +27,9 @@ body {
 }
 
 label {
-  display: block;
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 0.8rem;
 }
 
 legend {
@@ -38,4 +40,10 @@ legend {
 
 legend:empty {
   display: none;
+}
+
+[jsf-properties] {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
 }

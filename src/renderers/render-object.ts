@@ -18,11 +18,11 @@ export default function renderObject ({ root, schema, pathStack }: Frame) {
 
   html.push(parts.properties, parts.allOf, parts.anyOf, parts.oneOf);
 
-  return /*html*/dedent`
+  return dedent/*html*/`
     ${c(schema.$fieldsetBeforeBegin)}
-    <fieldset ${renderAttributes(schema.$fieldset)}>
+    <fieldset jsf-object ${renderAttributes(schema.$fieldset)}>
       ${c(schema.$fieldsetAfterBegin, schema.$legendBeforeBegin)}
-      <legend ${renderAttributes(schema.$legend)}>${c(
+      <legend ${renderAttributes(schema.$legend)}>${j(
         schema.$legendAfterBegin,
         schema.title,
         schema.$legendBeforeEnd

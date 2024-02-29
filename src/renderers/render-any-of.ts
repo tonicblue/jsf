@@ -17,15 +17,15 @@ export default function renderAnyOf ({ root, schema, pathStack }: Frame) {
 
   pathStack.pop();
 
-  return /*html*/dedent`
+  return dedent/*html*/`
     ${c(schema.$anyOfBeforeBegin)}
-    <div ${renderAttributes(schema.$anyOf)}>
+    <fieldset jsf-any-of ${renderAttributes(schema.$anyOf)}>
       ${j(
         schema.$anyOfAfterBegin,
         html.join(''),
         schema.$anyOfBeforeEnd
       )}
-    </div>
+    </fieldset>
     ${c(schema.$anyOfAfterEnd)}
   `;
 }
