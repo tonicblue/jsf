@@ -1,3 +1,6 @@
+// TODO: update all html rendering to use something like the the `renderNode()` method which auto
+// wraps elements opening and closing tags given a schema
+
 import dedent from "./dedent";
 import type { Frame } from "./frame";
 import isObject from "./is-object";
@@ -10,7 +13,7 @@ export function renderAttributes (attributes: Attributes) {
     return '';
 
   const html = Object.entries(attributes)
-    .filter(([key, value]) => value != null && value !== false)
+    .filter(([, value]) => value != null && value !== false)
     .map(([key, value]) => {
       // TODO: improve how i snake-case inputs maybe? is this the best way?
       const attribute = key.replace(/([A-Z]{1})([a-z])/g, '-$1$2')
@@ -20,7 +23,9 @@ export function renderAttributes (attributes: Attributes) {
         .replace(/(^-?)(.*?)(-?$)/, '$2');
 
       if (value === true) return attribute;
-      if (value === false) return ''; // TYPEHACK: this is never hit because we filter `false` and nullish values above
+
+      // TYPEHACK: this is never hit because we filter `false` and nullish values above
+      if (value === false) return '';
 
       return `${attribute}="${htmlEntities(value)}"`;
     })
@@ -81,7 +86,6 @@ export function renderJsonHtml ([tagName, attributes, ...childeNodes]: HtmlNode)
     </${tagName}>
   `;
 }
-
 
 export function c (...args: any[]) {
   return j('', ...args);

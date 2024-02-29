@@ -1,7 +1,7 @@
 import { renderSchema } from "../schema";
 import dedent from "../dedent";
 import type { Frame } from "../frame";
-import { c, j } from "../renderer";
+import { c, j, renderAttributes } from "../renderer";
 
 export default function renderProperties ({ root, schema, pathStack }: Frame) {
   const html = [];
@@ -15,17 +15,22 @@ export default function renderProperties ({ root, schema, pathStack }: Frame) {
     }
   }
 
+  const $properties = {
+    ...(schema.$properties || {}),
+    jsfSchemaPath: pathStack.join('/'),
+    jsfProperties: true,
+  };
   pathStack.pop();
 
   return /*html*/dedent`
     ${c(schema.$propertiesBeforeBegin)}
-    <div data-schema-path="properties">
-      ${j('\n',
+    <fieldset ${renderAttributes($properties)}>
+      ${j(
         schema.$propertiesAfterBegin,
         html.join(''),
-        schema.$propertiesBeforeEnd)
-      }
-    </div>
-    ${c(schema.$propertiesAfterBegin)}
+        schema.$propertiesBeforeEnd
+      )}
+    </fieldset>
+    ${c(schema.$propertiesAfterEnd)}
   `;
 }

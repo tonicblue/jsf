@@ -1,7 +1,7 @@
 import { renderSchema } from "../schema";
 import dedent from "../dedent";
 import type { Frame } from "../frame";
-import { c, j } from "../renderer";
+import { c, j, renderAttributes } from "../renderer";
 
 export default function renderOneOf ({ root, schema, pathStack }: Frame) {
   if (!schema.oneOf) return '';
@@ -19,13 +19,13 @@ export default function renderOneOf ({ root, schema, pathStack }: Frame) {
 
   return /*html*/dedent`
     ${c(schema.$oneOfBeforeBegin)}
-    <div data-schema-path="oneOf">
-      ${j('\n',
+    <div ${renderAttributes(schema.$oneOf)}>
+      ${j(
         schema.$oneOfAfterBegin,
         html.join(''),
         schema.$oneOfBeforeEnd
       )}
     </div>
-    ${c(schema.$oneOfAfterBegin)}
+    ${c(schema.$oneOfAfterEnd)}
   `;
 }

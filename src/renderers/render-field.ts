@@ -2,7 +2,6 @@ import dedent from "../dedent";
 import type { Frame } from "../frame";
 import { c, renderAttributes, type Attributes } from "../renderer";
 import type { Schema } from "../schema";
-import renderNotImplemented from "./render-not-implemented";
 
 export function renderString ({ root, schema, pathStack }: Frame) {
   if (schema.enum == null) return renderTextLikeField({ root, schema, pathStack });
@@ -184,7 +183,7 @@ function renderRadioField({ root, schema, pathStack }: Frame) {
       checked, ...schema.$input
     };
 
-    return renderInputField({ ...schema, $input })
+    return renderInputField({ ...schema, $input, title: '' + option })
   }).join('\n');
 
   return dedent/*html*/`

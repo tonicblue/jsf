@@ -18,6 +18,8 @@ const testSchema = [
   }
 ]
 
+
+
 for (const schema of testSchema) {
   console.log(renderSchema({ root: schema, schema, pathStack: [] }));
 }

@@ -1,6 +1,6 @@
 import dedent from "../dedent";
 import type { Frame } from "../frame";
-import { c, renderAttributes } from "../renderer";
+import { c, j, renderAttributes } from "../renderer";
 import renderAllOf from "./render-all-of";
 import renderAnyOf from "./render-any-of";
 import renderOneOf from "./render-one-of";
@@ -22,13 +22,17 @@ export default function renderObject ({ root, schema, pathStack }: Frame) {
     ${c(schema.$fieldsetBeforeBegin)}
     <fieldset ${renderAttributes(schema.$fieldset)}>
       ${c(schema.$fieldsetAfterBegin, schema.$legendBeforeBegin)}
-      <legend ${renderAttributes(schema.$legend)}>
-        ${c(schema.$legendAfterBegin, schema.title, schema.$legendBeforeEnd)}
-      </legend>
-      ${c(schema.$fieldsetAfterEnd)}
-      ${html.join('')}
-      ${c(schema.$fieldsetBeforeEnd)}
-    </label>
+      <legend ${renderAttributes(schema.$legend)}>${c(
+        schema.$legendAfterBegin,
+        schema.title,
+        schema.$legendBeforeEnd
+      )}</legend>
+      ${j(
+        schema.$fieldsetAfterEnd,
+        html.join(''),
+        schema.$fieldsetBeforeEnd
+      )}
+    </fieldset>
     ${c(schema.$fieldsetAfterEnd)}
   `;
 }
