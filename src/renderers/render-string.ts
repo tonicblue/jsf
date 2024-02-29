@@ -70,6 +70,11 @@ export default function renderString ({ root, schema, pathStack }: Frame) {
       break;
 
     case ('json-pointer'):
+      $input.type = 'text';
+      // SOURCE: https://www.regextester.com/98146
+      $input.pattern = '^(\/(([^/~])|(~[01]))*)$';
+      break;
+
     case ('relative-json-pointer'):
       $input.type = 'text';
       // SOURCE: https://www.regextester.com/98146
