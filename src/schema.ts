@@ -2,12 +2,9 @@ import dedent from "./dedent";
 import type { Frame } from "./frame";
 import isObject from "./is-object";
 import renderArray from "./renderers/render-array";
-import renderBoolean from "./renderers/render-boolean";
 import renderEnum from "./renderers/render-enum";
-import renderInteger from "./renderers/render-integer";
-import renderNumber from "./renderers/render-number";
+import { renderString, renderNumber, renderInteger, renderBoolean } from "./renderers/render-field";
 import renderObject from "./renderers/render-object";
-import renderString from "./renderers/render-string";
 
 export type ElementPosition = 'BeforeBegin' | 'AfterBegin' | 'BeforeEnd' | 'AfterEnd';
 
@@ -34,6 +31,12 @@ export type Schema = {
     'uri-template' | 'json-pointer' | 'relative-json-pointer' | 'regex'
   );
 
+  multipleOf?: number;
+  minimum?: number;
+  exclusiveMinimum?: number;
+  maximum?: number;
+  exclusiveMaximum?: number;
+
   properties?: Record<string, Schema>;
   patternProperties?: Record<string, Schema>;
 
@@ -53,13 +56,8 @@ export function renderSchema ({ root, schema, pathStack }: Frame) : string {
   if (!isObject(schema))
     schema = {};
 
-  const type = (
-    schema.enum
-      ? 'enum'
-      : schema.type ?? typeof schema.const
-  )
-
-  switch (type) {
+  // TODO: type inference
+  switch (schema.type) {
     case ('string'):
       return renderString({ root, schema, pathStack });
 
@@ -84,7 +82,7 @@ export function renderSchema ({ root, schema, pathStack }: Frame) : string {
     default:
       return dedent`
         <div class="text-error">
-          <strong>Unrecognised schema: ${type}</strong>
+          <strong>Unrecognised schema: ${schema.type}</strong>
           <pre>${pathStack.join('/')}</pre>
           <pre>${JSON.stringify(schema, null, 2)}</pre>
         </div>

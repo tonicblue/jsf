@@ -3,14 +3,40 @@ import type { Frame } from "./frame";
 import isObject from "./is-object";
 import RendererError from "./renderer-error";
 
-export function renderAttributes (attributes: Record<string, string>) {
+export type Attributes = Record<string, string | number | boolean>;
+
+export function renderAttributes (attributes: Attributes) {
   if (!isObject(attributes))
     return '';
 
-  // TODO: Escaping attribute keys and values
-  return Object.entries(attributes)
-    .map(([key, value]) => `${key}=${value}"`)
+  const html = Object.entries(attributes)
+    .filter(([key, value]) => value != null && value !== false)
+    .map(([key, value]) => {
+      // TODO: improve how i snake-case inputs maybe? is this the best way?
+      const attribute = key.replace(/([A-Z]{1})([a-z])/g, '-$1$2')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '-')
+        .replace(/-{2,}/g, '-')
+        .replace(/(^-?)(.*?)(-?$)/, '$2');
+
+      if (value === true) return attribute;
+      if (value === false) return ''; // TYPEHACK: this is never hit because we filter `false` and nullish values above
+
+      return `${attribute}="${htmlEntities(value)}"`;
+    })
     .join(' ');
+
+  if (!html) return '';
+
+  return ` ${html}`;
+}
+
+export function htmlEntities(str: string | number) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 const templateCache: Record<string, () => string> = {};
@@ -38,8 +64,6 @@ export function renderHtmlTemplate (template: string, { root, schema, pathStack 
 }
 
 // TODO: maybe flip this around so this method expects an array of nodes so it can handle strings or tuples
-// NOTE: started implementing this in renderers/render-boolean.ts
-
 type HtmlNode = [tagName: string, attributes: Record<string, string>, ...(HtmlNode | string | undefined | null)[]]
 export function renderJsonHtml ([tagName, attributes, ...childeNodes]: HtmlNode) {
   const attributesHtml = renderAttributes(attributes);
