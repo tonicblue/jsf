@@ -15,7 +15,7 @@ const testSchema: Schema[] = [
       test2: {
         type: 'string',
         title: 'Test 2',
-        enum: ['option 1', 'option 2', 3],
+        enum: ['option 1', 'option 2', 'option 3'],
         $input: {
           type: 'radio'
         }

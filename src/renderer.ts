@@ -68,21 +68,29 @@ export function renderHtmlTemplate (template: string, { root, schema, pathStack 
   return rendered;
 }
 
-// TODO: maybe flip this around so this method expects an array of nodes so it can handle strings or tuples
-type HtmlNode = [tagName: string, attributes: Record<string, string>, ...(HtmlNode | string | undefined | null)[]]
-export function renderJsonHtml ([tagName, attributes, ...childeNodes]: HtmlNode) {
-  const attributesHtml = renderAttributes(attributes);
+export function renderHtmlNodes (...nodes: (string | HtmlNode | null | undefined)[]) {
   const html: string[] = [];
 
-  for (const node of childeNodes) {
+  for (const node of nodes) {
     if (!node) continue;
-    if (typeof node === 'string') return node;
-    if (Array.isArray(node)) return renderJsonHtml(node)
+    if (typeof node === 'string') html.push(node);
+    if (Array.isArray(node)) html.push(renderHtmlNode(node));
   }
+
+  return html.join('');
+}
+
+// TODO: maybe flip this around so this method expects an array of nodes so it can handle strings or tuples
+type HtmlNode = [tagName: string, attributes?: Record<string, string>, ...(HtmlNode | string | undefined | null)[]]
+export function renderHtmlNode ([tagName, attributes, ...childeNodes]: HtmlNode) {
+  const attributesHtml = attributes
+    ? renderAttributes(attributes)
+    : ''
+  const childHtml = renderHtmlNodes(...childeNodes);
 
   return dedent/*html*/`
     <${tagName} ${attributesHtml}>
-      ${html.join('')}
+      ${childHtml}
     </${tagName}>
   `;
 }

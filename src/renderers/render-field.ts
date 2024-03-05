@@ -1,6 +1,6 @@
 import dedent from "../dedent";
 import type { Frame } from "../frame";
-import { c, renderAttributes, type Attributes } from "../renderer";
+import { c, renderAttributes, type Attributes, renderHtmlNodes } from "../renderer";
 import type { Schema } from "../schema";
 
 export function renderString ({ root, schema, pathStack }: Frame) {
@@ -162,11 +162,11 @@ export function renderInputField (schema: Schema) {
 }
 
 export function renderTextareaField (schema: Schema) {
-  return renderField(schema, dedent/*html*/`
-    ${c(schema.$textareaBeforeBegin)}
-    <textarea ${renderAttributes(schema.$textarea)}>${schema.const ?? schema.default ?? ''}</textarea>
-    ${c(schema.$textareaAfterEnd)}
-  `);
+  return renderField(schema, renderHtmlNodes(
+    schema.$textareaBeforeBegin,
+    ['textarea', schema.$textarea, (schema.const ?? schema.default ?? '')],
+    schema.$textareaAfterEnd,
+  ));
 }
 
 function renderRadioField({ root, schema, pathStack }: Frame) {
