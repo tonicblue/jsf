@@ -1,6 +1,6 @@
 import dedent from "../dedent";
 import type { Frame } from "../frame";
-import { c, renderAttributes, type Attributes, renderHtmlNodes } from "../renderer";
+import { c, renderAttributes, type Attributes, renderHtmlNodes, renderHtmlNode } from "../renderer";
 import type { Schema } from "../schema";
 
 export function renderString ({ root, schema, pathStack }: Frame) {
@@ -154,23 +154,27 @@ export function renderBoolean ({ root, schema, pathStack }: Frame) {
 }
 
 export function renderInputField (schema: Schema) {
-  return renderField(schema, dedent/*html*/`
-    ${c(schema.$inputBeforeBegin)}
-    <input ${renderAttributes(schema.$input)}>
-    ${c(schema.$inputAfterEnd)}
-  `);
+			const inputHtml = renderHtmlNodes(
+    schema.$inputBeforeBegin,
+    ['input', schema.$input],
+    schema.$inputAfterEnd,
+  );
+
+  return renderField(schema, inputHtml);
 }
 
 export function renderTextareaField (schema: Schema) {
-  return renderField(schema, renderHtmlNodes(
+  const textareaHtml = renderHtmlNodes(
     schema.$textareaBeforeBegin,
     ['textarea', schema.$textarea, (schema.const ?? schema.default ?? '')],
     schema.$textareaAfterEnd,
-  ));
+  );
+
+  return renderField(schema, textareaHtml);
 }
 
 function renderRadioField({ root, schema, pathStack }: Frame) {
-  const options = (schema.enum || []).map((option) => {
+  const optionsHtml = (schema.enum || []).map((option) => {
     const checked = (
       schema.const != null
         ? option == schema.const
@@ -186,21 +190,28 @@ function renderRadioField({ root, schema, pathStack }: Frame) {
     return renderInputField({ ...schema, $input, title: '' + option })
   }).join('\n');
 
-  return dedent/*html*/`
-    ${c(schema.$fieldsetBeforeBegin)}
-    <fieldset ${renderAttributes(schema.$fieldset)}>
-      ${c(schema.$fieldsetAfterBegin, schema.$legendBeforeBegin)}
-      <legend ${renderAttributes(schema.$legend)}>
-        ${c(schema.$legendAfterBegin, schema.title, schema.$legendBeforeEnd)}
-      </legend>
-      ${c(schema.$afterLegend, schema.$optionBefore, options, schema.$optionsAfter, schema.$fieldsetBeforeEnd)}
-    </fieldset>
-    ${c(schema.$fieldsetAfterEnd)}
-  `;
+  return renderHtmlNodes(
+    schema.$fieldsetBeforeBegin,
+    ['fieldset', schema.$fieldset, 
+      schema.$fieldsetAfterBegin, 
+      schema.$legendBeforeBegin,
+      ['legend', schema.$legend,
+        schema.$legendAfterBegin, 
+        schema.title, 
+        schema.$legendBeforeEnd,
+      ],
+      schema.$afterLegend, 
+      schema.$optionBefore, 
+      optionsHtml, 
+      schema.$optionsAfter, 
+      schema.$fieldsetBeforeEnd,
+    ],
+    schema.$fieldsetAfterEnd,
+  );
 }
 
 export function renderSelectField ({ root, schema, pathStack }: Frame) {
-  const options = (schema.enum || []).map((option) => {
+  const optionsHtml = (schema.enum || []).map((option) => {
     const selected = (
       schema.const != null
         ? option == schema.const
@@ -212,32 +223,37 @@ export function renderSelectField ({ root, schema, pathStack }: Frame) {
       selected
     };
 
-    return /*html*/`<option ${renderAttributes($option)}>${option}</option>`;
+    return renderHtmlNode('option', $option, option);
   }).join('\n');
 
   const { $select = {} } = schema;
 
   $select.jsfSchemaPath = pathStack.join('/');
 
-  return renderField(schema, dedent/*html*/`
-    ${c(schema.$selectBeforeBegin)}
-    <select ${renderAttributes($select)}>
-      ${options}
-    </select>
-    ${c(schema.$selectAfterEnd)}
-  `);
+  const selectHtml = renderHtmlNodes(
+    schema.$selectBeforeBegin,
+    ['select', $select, optionsHtml],
+    schema.$selectAfterEnd,
+  );
+
+  return renderField(schema, selectHtml);
 }
 
 export function renderField (schema: Schema, fieldHtml: string) {
-  return dedent/*html*/`
-    ${c(schema.$labelBeforeBegin)}
-    <label ${renderAttributes(schema.$label)}>
-      ${c(schema.$labelAfterBegin, schema.$spanBeforeBegin)}
-      <span ${renderAttributes(schema.$span)}>
-        ${c(schema.$spanAfterBegin, schema.title, schema.$spanBeforeEnd)}
-      </span>
-      ${c(schema.$spanAfterEnd, fieldHtml, schema.$labelBeforeEnd)}
-    </label>
-    ${c(schema.$labelAfterEnd)}
-  `;
+  return renderHtmlNodes(
+    schema.$labelBeforeBegin,
+    ['label', schema.$label,
+      schema.$labelAfterBegin, 
+      schema.$spanBeforeBegin,
+      ['span', schema.$span,
+        schema.$spanAfterBegin, 
+        schema.title, 
+        schema.$spanBeforeEnd,
+      ],
+      schema.$spanAfterEnd, 
+      fieldHtml, 
+      schema.$labelBeforeEnd,
+    ],
+    schema.$labelAfterEnd,
+  );
 }
