@@ -1,10 +1,11 @@
 import dedent from "./dedent";
 import type { Frame } from "./frame";
-import isObject from "./is-object";
+import isObject from "./utilities/is-object";
 import renderArray from "./renderers/render-array";
 import renderEnum from "./renderers/render-enum";
 import { renderString, renderNumber, renderInteger, renderBoolean } from "./renderers/render-field";
 import renderObject from "./renderers/render-object";
+import Exception from "./exception";
 
 export type ElementPosition = 'BeforeBegin' | 'AfterBegin' | 'BeforeEnd' | 'AfterEnd';
 
@@ -88,4 +89,27 @@ export function renderSchema ({ root, schema, pathStack }: Frame) : string {
         </div>
       `;
   }
+}
+
+export function resolveSchemaPath (schema: Schema, path: string) {
+  const pathParts = path.split('/');
+  const isRef = (
+    pathParts[0] === '$ref'
+      ? !!pathParts.shift()
+      : false
+  );
+  let currentNode: any = { ...schema };
+  let currentPath: string[] = [];
+
+  if (pathParts[0] === '') pathParts.shift();
+
+  for (const part of pathParts) {
+    if (currentNode[part] == null)
+      throw new Exception(`Invalid path: '${path}'. Could not find '${part}' at '/${currentPath.join('/')}'`);
+
+    currentPath.push(part);
+    currentNode = currentNode[part];
+  }
+
+  return currentNode;
 }

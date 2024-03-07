@@ -1,12 +1,10 @@
-// TODO: update all html rendering to use something like the the `renderNode()` method which auto
-// wraps elements opening and closing tags given a schema
-
 import dedent from "./dedent";
-import type { Frame } from "./frame";
-import isObject from "./is-object";
-import RendererError from "./renderer-error";
+import isObject from "./utilities/is-object";
+import trim from "./utilities/trim";
 
 export type Attributes = Record<string, string | number | boolean>;
+type HtmlChildNode = (HtmlNode | string | number | boolean | undefined | null);
+type HtmlNode = [tagName: string, attributes: Attributes, ...HtmlChildNode[]]
 
 export function renderAttributes (attributes: Attributes) {
   if (!isObject(attributes))
@@ -16,11 +14,10 @@ export function renderAttributes (attributes: Attributes) {
     .filter(([, value]) => value != null && value !== false)
     .map(([key, value]) => {
       // TODO: improve how i snake-case inputs maybe? is this the best way?
-      const attribute = key.replace(/([A-Z]{1})([a-z])/g, '-$1$2')
+      const attribute = trim(key.replace(/[A-Z]/g, (letter) => `-${letter}`)
         .toLowerCase()
         .replace(/[^a-z0-9]/g, '-')
-        .replace(/-{2,}/g, '-')
-        .replace(/(^-?)(.*?)(-?$)/, '$2');
+        .replace(/-{2,}/g, '-'));
 
       if (value === true) return attribute;
 
@@ -44,45 +41,19 @@ export function htmlEntities(str: string | number) {
     .replace(/"/g, '&quot;');
 }
 
-const templateCache: Record<string, () => string> = {};
-
-export function renderHtmlTemplate (template: string, { root, schema, pathStack }: Frame, attributes: Record<string, Record<string, string>> = {}) {
-  if (!templateCache[template])
-    templateCache[template] = new Function(`return \`${template}\`;`) as () => string;
-
-  let rendered = templateCache[template].call({ root, schema, pathStack });
-
-  for (const [key, value] of Object.entries(attributes)) {
-    const tagName = key.match(/^(?:\$)([a-z]+)(?:Attributes)$/)?.[0];
-
-    if (!tagName) continue;
-
-    const tagRegex = new RegExp(`\<${tagName} `);
-
-    if (!rendered.match(tagRegex))
-      throw new RendererError(`Schema template missing HTML tag <${tagName}>`, schema, pathStack);
-
-    rendered = rendered.replace(tagRegex, `<${tagName} ${renderAttributes(value)}`);
-  }
-
-  return rendered;
-}
-
-export function renderHtmlNodes (...nodes: (string | HtmlNode | null | undefined)[]) {
+export function renderHtmlNodes (...nodes: HtmlChildNode[]) {
   const html: string[] = [];
 
   for (const node of nodes) {
     if (!node) continue;
     if (typeof node === 'string') html.push(node);
-    if (Array.isArray(node)) html.push(renderHtmlNode(node));
+    if (Array.isArray(node)) html.push(renderHtmlNode(...node));
   }
 
   return html.join('');
 }
 
-// TODO: maybe flip this around so this method expects an array of nodes so it can handle strings or tuples
-type HtmlNode = [tagName: string, attributes?: Record<string, string>, ...(HtmlNode | string | undefined | null)[]]
-export function renderHtmlNode ([tagName, attributes, ...childeNodes]: HtmlNode) {
+export function renderHtmlNode (tagName: string, attributes: Attributes, ...childeNodes: HtmlChildNode[]) {
   const attributesHtml = attributes
     ? renderAttributes(attributes)
     : ''

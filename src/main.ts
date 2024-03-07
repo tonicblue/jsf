@@ -1,8 +1,16 @@
 import './style.css'
-import { Schema, renderSchema } from './schema';
+import { renderSchema, resolveSchemaPath } from './schema';
+import S from 'fluent-json-schema';
+import { renderHtmlNode } from './renderer';
 
 const output: string[] = [];
-const testSchema: Schema[] = [
+const testSchema: any[] = [
+  S.object()
+    .title('Test object')
+    .prop('test1', S.string().title('Test 1').format(S.FORMATS.URI))
+    .prop('test2', S.string().title('Test 2').enum(['option 1', 'option 2', 'option 3']))
+    .valueOf(),
+
   {
     type: 'object',
     title: 'Test object',
@@ -89,6 +97,24 @@ const testSchema: Schema[] = [
 
 for (const schema of testSchema) {
   output.push(renderSchema({ root: schema, schema, pathStack: [] }));
+}
+
+const resolveTests = [
+  {
+    schema: testSchema[1],
+    path: '/properties/test1',
+  },
+  {
+    schema: testSchema[1],
+    path: '/oneOf/1/properties/test_other_2_1',
+  },
+]
+
+for (const { schema, path } of resolveTests) {
+  output.push(renderHtmlNode('pre', {},
+    `Resolving: ${path}\n`,
+    JSON.stringify(resolveSchemaPath(schema, path), null, 2),
+  ));
 }
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = output.join('\n');

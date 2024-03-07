@@ -1,6 +1,5 @@
-import dedent from "../dedent";
 import type { Frame } from "../frame";
-import { c, renderAttributes, type Attributes, renderHtmlNodes, renderHtmlNode } from "../renderer";
+import { type Attributes, renderHtmlNodes, renderHtmlNode } from "../renderer";
 import type { Schema } from "../schema";
 
 export function renderString ({ root, schema, pathStack }: Frame) {
@@ -127,7 +126,6 @@ export function renderNumber ({ root, schema, pathStack }: Frame) {
 
   $input.type = 'number';
   $input.value = schema.const ?? schema.default ?? '';
-  // TODO: Implement ability to set step with different intervals;
   $input.jsfDataType = 'number';
   $input.jsfSchemaPath = pathStack.join('/');
 
@@ -192,18 +190,18 @@ function renderRadioField({ root, schema, pathStack }: Frame) {
 
   return renderHtmlNodes(
     schema.$fieldsetBeforeBegin,
-    ['fieldset', schema.$fieldset, 
-      schema.$fieldsetAfterBegin, 
+    ['fieldset', schema.$fieldset,
+      schema.$fieldsetAfterBegin,
       schema.$legendBeforeBegin,
       ['legend', schema.$legend,
-        schema.$legendAfterBegin, 
-        schema.title, 
+        schema.$legendAfterBegin,
+        schema.title,
         schema.$legendBeforeEnd,
       ],
-      schema.$afterLegend, 
-      schema.$optionBefore, 
-      optionsHtml, 
-      schema.$optionsAfter, 
+      schema.$afterLegend,
+      schema.$optionBefore,
+      optionsHtml,
+      schema.$optionsAfter,
       schema.$fieldsetBeforeEnd,
     ],
     schema.$fieldsetAfterEnd,
@@ -243,15 +241,15 @@ export function renderField (schema: Schema, fieldHtml: string) {
   return renderHtmlNodes(
     schema.$labelBeforeBegin,
     ['label', schema.$label,
-      schema.$labelAfterBegin, 
+      schema.$labelAfterBegin,
       schema.$spanBeforeBegin,
       ['span', schema.$span,
-        schema.$spanAfterBegin, 
-        schema.title, 
+        schema.$spanAfterBegin,
+        schema.title,
         schema.$spanBeforeEnd,
       ],
-      schema.$spanAfterEnd, 
-      fieldHtml, 
+      schema.$spanAfterEnd,
+      fieldHtml,
       schema.$labelBeforeEnd,
     ],
     schema.$labelAfterEnd,
