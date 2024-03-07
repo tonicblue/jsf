@@ -154,7 +154,7 @@ export function renderBoolean ({ root, schema, pathStack }: Frame) {
 }
 
 export function renderInputField (schema: Schema) {
-			const inputHtml = renderHtmlNodes(
+    const inputHtml = renderHtmlNodes(
     schema.$inputBeforeBegin,
     ['input', schema.$input],
     schema.$inputAfterEnd,
