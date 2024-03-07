@@ -1,9 +1,10 @@
 import { renderSchema } from "../schema";
-import dedent from "../dedent";
 import type { Frame } from "../frame";
-import { c, j, renderAttributes } from "../renderer";
+import { renderHtmlNodes } from "../renderer";
 
-export default function renderAnyOf ({ root, schema, pathStack }: Frame) {
+export default function renderAnyOf (frame: Frame) {
+  const { schema, pathStack, root, data } = frame;
+
   if (!schema.anyOf) return '';
 
   const html = [];
@@ -11,21 +12,19 @@ export default function renderAnyOf ({ root, schema, pathStack }: Frame) {
 
   for (const [index, value] of Object.entries(schema.anyOf)) {
     pathStack.push(index);
-    html.push(renderSchema({ root, schema: value, pathStack }));
+    html.push(renderSchema({ root, schema: value, pathStack, data }));
     pathStack.pop();
   }
 
   pathStack.pop();
 
-  return dedent/*html*/`
-    ${c(schema.$anyOfBeforeBegin)}
-    <fieldset jsf-any-of ${renderAttributes(schema.$anyOf)}>
-      ${j(
-        schema.$anyOfAfterBegin,
-        html.join(''),
-        schema.$anyOfBeforeEnd
-      )}
-    </fieldset>
-    ${c(schema.$anyOfAfterEnd)}
-  `;
+  return renderHtmlNodes(
+    schema.$anyOfBeforeBegin,
+    ['fieldset', schema.$anyOf,
+      schema.$anyOfAfterBegin,
+      html.join(''),
+      schema.$anyOfBeforeEnd
+    ],
+    schema.$anyOfAfterEnd,
+  );
 }

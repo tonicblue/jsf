@@ -65,11 +65,3 @@ export function renderHtmlNode (tagName: string, attributes: Attributes, ...chil
     </${tagName}>
   `;
 }
-
-export function c (...args: any[]) {
-  return j('', ...args);
-}
-
-export function j (delimiter: string, ...args: any[]) {
-  return args.filter(arg => arg != null).join(delimiter);
-}

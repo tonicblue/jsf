@@ -1,16 +1,16 @@
 import { renderSchema } from "../schema";
-import dedent from "../dedent";
 import type { Frame } from "../frame";
-import { c, j, renderAttributes } from "../renderer";
+import { renderHtmlNodes } from "../renderer";
 
-export default function renderProperties ({ root, schema, pathStack }: Frame) {
+export default function renderProperties (frame: Frame) {
+  const { schema, pathStack, root, data } = frame;
   const html = [];
   pathStack.push('properties');
 
   if (schema.properties) {
     for (const [key, value] of Object.entries(schema.properties)) {
       pathStack.push(key);
-      html.push(renderSchema({ root, schema: value, pathStack }));
+      html.push(renderSchema({ root, schema: value, pathStack, data }));
       pathStack.pop();
     }
   }
@@ -22,15 +22,13 @@ export default function renderProperties ({ root, schema, pathStack }: Frame) {
   };
   pathStack.pop();
 
-  return dedent/*html*/`
-    ${c(schema.$propertiesBeforeBegin)}
-    <fieldset ${renderAttributes($properties)}>
-      ${j(
-        schema.$propertiesAfterBegin,
-        html.join(''),
-        schema.$propertiesBeforeEnd
-      )}
-    </fieldset>
-    ${c(schema.$propertiesAfterEnd)}
-  `;
+  return renderHtmlNodes(
+    schema.$propertiesBeforeBegin,
+    ['fieldset',  $properties,
+      schema.$propertiesAfterBegin,
+      html.join(''),
+      schema.$propertiesBeforeEnd
+    ],
+    schema.$propertiesAfterEnd,
+  );
 }

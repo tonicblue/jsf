@@ -1,6 +1,5 @@
 import dedent from "./dedent";
 import type { Frame } from "./frame";
-import isObject from "./utilities/is-object";
 import renderArray from "./renderers/render-array";
 import renderEnum from "./renderers/render-enum";
 import { renderString, renderNumber, renderInteger, renderBoolean } from "./renderers/render-field";
@@ -49,39 +48,33 @@ export type Schema = {
   const?: any;
 } & {[key in `$${string}` | `$${string}${ElementPosition}`]: any }
 
-function resolve (schema: Schema, path: string | string[]) {
+export function renderSchema (frame: Frame) : string {
+  const { schema, pathStack } = frame;
 
-}
-
-export function renderSchema ({ root, schema, pathStack }: Frame) : string {
-  if (!isObject(schema))
-    schema = {};
-
-  // TODO: type inference
   switch (schema.type) {
     case ('string'):
-      return renderString({ root, schema, pathStack });
+      return renderString(frame);
 
     case ('number'):
-      return renderNumber({ root, schema, pathStack });
+      return renderNumber(frame);
 
     case ('integer'):
-      return renderInteger({ root, schema, pathStack });
+      return renderInteger(frame);
 
     case ('boolean'):
-      return renderBoolean({ root, schema, pathStack });
+      return renderBoolean(frame);
 
     case ('enum'):
-      return renderEnum({ root, schema, pathStack });
+      return renderEnum(frame);
 
     case ('array'):
-      return renderArray({ root, schema, pathStack });
+      return renderArray(frame);
 
     case ('object'):
-      return renderObject({ root, schema, pathStack });
+      return renderObject(frame);
 
     default:
-      return dedent`
+      return dedent/*html*/`
         <div class="text-error">
           <strong>Unrecognised schema: ${schema.type}</strong>
           <pre>${pathStack.join('/')}</pre>
@@ -91,15 +84,11 @@ export function renderSchema ({ root, schema, pathStack }: Frame) : string {
   }
 }
 
+// TODO: Add $defs support
 export function resolveSchemaPath (schema: Schema, path: string) {
   const pathParts = path.split('/');
-  const isRef = (
-    pathParts[0] === '$ref'
-      ? !!pathParts.shift()
-      : false
-  );
+  const currentPath: string[] = [];
   let currentNode: any = { ...schema };
-  let currentPath: string[] = [];
 
   if (pathParts[0] === '') pathParts.shift();
 

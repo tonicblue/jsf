@@ -1,9 +1,10 @@
 import './style.css'
 import { renderSchema, resolveSchemaPath } from './schema';
+import { createFrame } from './frame';
 import S from 'fluent-json-schema';
 import { renderHtmlNode } from './renderer';
 
-const output: string[] = [];
+const $app = document.querySelector('#app');
 const testSchema: any[] = [
   S.object()
     .title('Test object')
@@ -96,7 +97,8 @@ const testSchema: any[] = [
 ];
 
 for (const schema of testSchema) {
-  output.push(renderSchema({ root: schema, schema, pathStack: [] }));
+  const frame = createFrame(schema);
+  $app?.insertAdjacentHTML('beforeend', renderSchema(frame));
 }
 
 const resolveTests = [
@@ -111,10 +113,17 @@ const resolveTests = [
 ]
 
 for (const { schema, path } of resolveTests) {
-  output.push(renderHtmlNode('pre', {},
+  const strippedPath = path.replace(/^\//, '');
+  const selector = `input[jsf-schema-path="${strippedPath}"],
+  [jsf-schema-path="${strippedPath}"] input`;
+  $app?.insertAdjacentHTML('beforeend', renderHtmlNode('pre', {},
     `Resolving: ${path}\n`,
+    `Selector: ${selector}\n`,
+    `Resolved: `,
     JSON.stringify(resolveSchemaPath(schema, path), null, 2),
   ));
-}
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = output.join('\n');
+  const input = document.querySelector(selector) as HTMLInputElement | null;
+  console.log(input);
+  if (input) input.style.outline = '3px solid #773377';
+}

@@ -2,15 +2,18 @@ import type { Frame } from "../frame";
 import { type Attributes, renderHtmlNodes, renderHtmlNode } from "../renderer";
 import type { Schema } from "../schema";
 
-export function renderString ({ root, schema, pathStack }: Frame) {
-  if (schema.enum == null) return renderTextLikeField({ root, schema, pathStack });
+export function renderString (frame: Frame) {
+const { schema } = frame;
 
-  if (schema.$input?.type == 'radio') return renderRadioField({ root, schema, pathStack });
+  if (schema.enum == null) return renderTextLikeField(frame);
 
-  return renderSelectField({ root, schema, pathStack });
+  if (schema.$input?.type == 'radio') return renderRadioField(frame);
+
+  return renderSelectField(frame);
 }
 
-function renderTextLikeField({ root, schema, pathStack }: Frame) {
+function renderTextLikeField(frame: Frame) {
+  const { schema, pathStack } = frame;
   const { $input = {} } = schema;
 
   switch (schema.format) {
@@ -104,7 +107,8 @@ function renderTextLikeField({ root, schema, pathStack }: Frame) {
   return renderInputField({ ...schema, $input });
 }
 
-export function renderInteger ({ root, schema, pathStack }: Frame) {
+export function renderInteger (frame: Frame) {
+  const { schema, pathStack } = frame;
   const { $input = {} } = schema;
 
   $input.type = 'number';
@@ -121,7 +125,8 @@ export function renderInteger ({ root, schema, pathStack }: Frame) {
   return renderInputField({ ...schema, $input });
 }
 
-export function renderNumber ({ root, schema, pathStack }: Frame) {
+export function renderNumber (frame: Frame) {
+  const { schema, pathStack } = frame;
   const { $input = {} } = schema;
 
   $input.type = 'number';
@@ -138,7 +143,8 @@ export function renderNumber ({ root, schema, pathStack }: Frame) {
   return renderInputField({ ...schema, $input });
 }
 
-export function renderBoolean ({ root, schema, pathStack }: Frame) {
+export function renderBoolean (frame: Frame) {
+  const { schema, pathStack } = frame;
   const { $input = {} } = schema;
 
   $input.type = 'checkbox';
@@ -171,7 +177,9 @@ export function renderTextareaField (schema: Schema) {
   return renderField(schema, textareaHtml);
 }
 
-function renderRadioField({ root, schema, pathStack }: Frame) {
+function renderRadioField(frame: Frame) {
+  const { schema } = frame;
+
   const optionsHtml = (schema.enum || []).map((option) => {
     const checked = (
       schema.const != null
@@ -208,7 +216,8 @@ function renderRadioField({ root, schema, pathStack }: Frame) {
   );
 }
 
-export function renderSelectField ({ root, schema, pathStack }: Frame) {
+export function renderSelectField (frame: Frame) {
+  const { schema, pathStack } = frame;
   const optionsHtml = (schema.enum || []).map((option) => {
     const selected = (
       schema.const != null
