@@ -1,3 +1,4 @@
+import { createFrame } from "./frame";
 import { renderSchema } from "./schema";
 
 const testSchema = [
@@ -21,5 +22,6 @@ const testSchema = [
 
 
 for (const schema of testSchema) {
-  console.log(renderSchema({ root: schema, schema, pathStack: [] }));
+  const frame = createFrame(schema, {});
+  console.log(renderSchema(frame));
 }

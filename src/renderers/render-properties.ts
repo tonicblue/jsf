@@ -3,24 +3,26 @@ import type { Frame } from "../frame";
 import { renderHtmlNodes } from "../renderer";
 
 export default function renderProperties (frame: Frame) {
-  const { schema, pathStack, root, data } = frame;
+  const { schema, schemaPathStack, dataPathStack, root, data } = frame;
   const html = [];
-  pathStack.push('properties');
+  schemaPathStack.push('properties');
 
   if (schema.properties) {
     for (const [key, value] of Object.entries(schema.properties)) {
-      pathStack.push(key);
-      html.push(renderSchema({ root, schema: value, pathStack, data }));
-      pathStack.pop();
+      schemaPathStack.push(key);
+      dataPathStack.push(key)
+      html.push(renderSchema({ root, schema: value, schemaPathStack, dataPathStack, data }));
+      schemaPathStack.pop();
+      dataPathStack.pop();
     }
   }
 
   const $properties = {
     ...(schema.$properties || {}),
-    jsfSchemaPath: pathStack.join('/'),
+    jsfSchemaPath: schemaPathStack.join('/'),
     jsfProperties: true,
   };
-  pathStack.pop();
+  schemaPathStack.pop();
 
   return renderHtmlNodes(
     schema.$propertiesBeforeBegin,

@@ -3,20 +3,20 @@ import type { Frame } from "../frame";
 import { renderHtmlNodes } from "../renderer";
 
 export default function renderAllOf (frame: Frame) {
-  const { schema, pathStack, root, data } = frame;
+  const { schema, schemaPathStack, dataPathStack, root, data } = frame;
 
   if (!schema.allOf) return '';
 
   const html = [];
-  pathStack.push('allOf');
+  schemaPathStack.push('allOf');
 
   for (const [index, value] of Object.entries(schema.allOf)) {
-    pathStack.push(index);
-    html.push(renderSchema({ root, schema: value, pathStack, data }));
-    pathStack.pop();
+    schemaPathStack.push(index);
+    html.push(renderSchema({ root, schema: value, schemaPathStack, dataPathStack, data }));
+    schemaPathStack.pop();
   }
 
-  pathStack.pop();
+  schemaPathStack.pop();
 
   return renderHtmlNodes(
     schema.$allOfBeforeBegin,

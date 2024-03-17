@@ -49,7 +49,7 @@ export type Schema = {
 } & {[key in `$${string}` | `$${string}${ElementPosition}`]: any }
 
 export function renderSchema (frame: Frame) : string {
-  const { schema, pathStack } = frame;
+  const { schema, schemaPathStack } = frame;
 
   switch (schema.type) {
     case ('string'):
@@ -77,7 +77,7 @@ export function renderSchema (frame: Frame) : string {
       return dedent/*html*/`
         <div class="text-error">
           <strong>Unrecognised schema: ${schema.type}</strong>
-          <pre>${pathStack.join('/')}</pre>
+          <pre>${schemaPathStack.join('/')}</pre>
           <pre>${JSON.stringify(schema, null, 2)}</pre>
         </div>
       `;

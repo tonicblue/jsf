@@ -3,14 +3,16 @@ import type { Schema } from "./schema";
 export type Frame = {
   root: Schema;
   schema: Schema;
-  pathStack: string[];
+  schemaPathStack: string[];
+  dataPathStack: string[];
   data: any;
 }
 
-export function createFrame (schema: Schema, data: any = {}) {
+export function createFrame (schema: Schema, data: any = {}): Frame {
   return {
     schema, data,
     root: schema,
-    pathStack: [],
+    schemaPathStack: [],
+    dataPathStack: [],
   };
 }

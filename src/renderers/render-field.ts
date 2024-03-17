@@ -13,7 +13,7 @@ const { schema } = frame;
 }
 
 function renderTextLikeField(frame: Frame) {
-  const { schema, pathStack } = frame;
+  const { schema, schemaPathStack } = frame;
   const { $input = {} } = schema;
 
   switch (schema.format) {
@@ -102,19 +102,19 @@ function renderTextLikeField(frame: Frame) {
 
   $input.value = schema.const ?? schema.default ?? '';
   $input.jsfDataType = 'string';
-  $input.jsfSchemaPath = pathStack.join('/');
+  $input.jsfSchemaPath = schemaPathStack.join('/');
 
   return renderInputField({ ...schema, $input });
 }
 
 export function renderInteger (frame: Frame) {
-  const { schema, pathStack } = frame;
+  const { schema, schemaPathStack } = frame;
   const { $input = {} } = schema;
 
   $input.type = 'number';
   $input.value = schema.const ?? schema.default ?? '';
   $input.jsfDataType = 'integer';
-  $input.jsfSchemaPath = pathStack.join('/');
+  $input.jsfSchemaPath = schemaPathStack.join('/');
 
   if (schema.multipleOf) $input.step = schema.multipleOf;
   if (schema.minimum) $input.min = schema.minimum;
@@ -126,13 +126,13 @@ export function renderInteger (frame: Frame) {
 }
 
 export function renderNumber (frame: Frame) {
-  const { schema, pathStack } = frame;
+  const { schema, schemaPathStack } = frame;
   const { $input = {} } = schema;
 
   $input.type = 'number';
   $input.value = schema.const ?? schema.default ?? '';
   $input.jsfDataType = 'number';
-  $input.jsfSchemaPath = pathStack.join('/');
+  $input.jsfSchemaPath = schemaPathStack.join('/');
 
   if (schema.multipleOf) $input.step = schema.multipleOf;
   if (schema.minimum) $input.min = schema.minimum;
@@ -144,12 +144,12 @@ export function renderNumber (frame: Frame) {
 }
 
 export function renderBoolean (frame: Frame) {
-  const { schema, pathStack } = frame;
+  const { schema, schemaPathStack } = frame;
   const { $input = {} } = schema;
 
   $input.type = 'checkbox';
   $input.jsfDataType = 'boolean';
-  $input.jsfSchemaPath = pathStack.join('/');
+  $input.jsfSchemaPath = schemaPathStack.join('/');
 
   if (schema.default === true) $input.checked = true;
   if (schema.const != null) $input.readonly = true;
@@ -217,7 +217,7 @@ function renderRadioField(frame: Frame) {
 }
 
 export function renderSelectField (frame: Frame) {
-  const { schema, pathStack } = frame;
+  const { schema, schemaPathStack } = frame;
   const optionsHtml = (schema.enum || []).map((option) => {
     const selected = (
       schema.const != null
@@ -235,7 +235,7 @@ export function renderSelectField (frame: Frame) {
 
   const { $select = {} } = schema;
 
-  $select.jsfSchemaPath = pathStack.join('/');
+  $select.jsfSchemaPath = schemaPathStack.join('/');
 
   const selectHtml = renderHtmlNodes(
     schema.$selectBeforeBegin,
