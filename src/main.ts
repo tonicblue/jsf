@@ -6,10 +6,10 @@ import { jsonCloser } from './json-closer.js';
 // import S from 'fluent-json-schema';
 // import { renderHtmlNode } from './renderer';
 
-const $app = document.querySelector('#app') as HTMLDivElement;
+const $form = document.querySelector('#form') as HTMLDivElement;
 const $log = document.querySelector('#log') as HTMLPreElement;
 const $prompt = document.querySelector('#prompt') as HTMLTextAreaElement;
-const $generate = document.querySelector('#generate') as HTMLButtonElement;
+const $reset = document.querySelector('#reset') as HTMLButtonElement;
 const history: Exchange[] = [];
 
 type Exchange = [prompt: string, response: string, $exchange: HTMLElement];
@@ -43,10 +43,7 @@ function getLastResponse () {
 }
 
 function getContext () {
-  return history.map(([prompt, response]) => Object([
-    { role: 'user', content: prompt },
-    { role: 'assistant', content: response }
-  ])).flat() as Message[];
+  return history.map(([prompt]) => `-- User prompt --\n\n${prompt}`).join('\n\n');
 }
 
 function renderForm () {
@@ -54,44 +51,57 @@ function renderForm () {
     const schemaJson = jsonCloser(getLastResponse()[1]);
     const schema = JSON.parse(schemaJson);
     const frame = createFrame(schema);
-    $app.innerHTML = renderSchema(frame);
+    $form.innerHTML = renderSchema(frame);
   } catch (err) {
     console.error(err.message, err);
   }
 }
 
 async function generate () {
+  document.body.classList.add('generating');
   $prompt.readOnly = true;
   const prompt = $prompt.value;
   $prompt.value = '';
 
-  startExchange(prompt);
+  try {
+    startExchange(prompt);
 
-  const response = await ollama.chat({
-    stream: true,
-    model: 'mistral:7b',
-    messages: [
-      ...getContext(),
-      {
-        role: 'user',
-        content: `
-The word 'Form' means 'JSON Schema'.
-Always generate a detailed JSON schema.
-Always use titles on properties.
-Do not include buttons in the JSON schema.
-Respond using JSON.
+    const currentSchema = getLastResponse()?.[1] ?? '{ "type": "object", "title": "Form" }';
+    const context = getContext();
+    const response = await ollama.generate({
+      stream: true,
+      model: 'mistral:7b',
+      format: 'json',
+      system: `
+        * The word 'Form' means 'JSON Schema'.
+        * Always generate a detailed JSON schema.
+        * Always use titles on properties.
+        * Do not include buttons in the JSON schema.
+        * Respond using JSON.
 
-${prompt}`,
-      }
-    ],
-  });
+        -- Start of user's previous prompts --
+        ${context}
+        -- End of user's previous prompts --
 
-  for await (const part of response) {
-    writeToResponse(part.message.content);
-    renderForm();
+        -- Start of current JSON schema --
+        \`\`\`json
+        ${currentSchema}
+        \`\`\`
+        -- End of current JSON schema --
+      `,
+      prompt,
+    });
+
+    for await (const part of response) {
+      writeToResponse(part.response);
+      renderForm();
+    }
+  } catch (err) {
+    $form.innerHTML = `<strong>An error occurred:</strong> <code>${err.message}</code>`;
   }
 
-  $app.insertAdjacentHTML('beforeend', `<button type="submit">Submit</button>`);
+  $form.insertAdjacentHTML('beforeend', `<button type="submit">Submit</button>`);
+  document.body.classList.remove('generating');
   $prompt.readOnly = false;
   $prompt.focus();
 }
@@ -101,4 +111,12 @@ $prompt.addEventListener('keypress', (evt) => {
     evt.preventDefault();
     generate().then();
   }
+});
+
+$reset.addEventListener('click', () => {
+  while (history.length)
+    history.pop();
+
+  $log.innerHTML = '';
+  $form.innerHTML = '';
 });

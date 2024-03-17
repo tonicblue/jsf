@@ -59,9 +59,5 @@ export function renderHtmlNode (tagName: string, attributes: Attributes, ...chil
     : ''
   const childHtml = renderHtmlNodes(...childeNodes);
 
-  return dedent/*html*/`
-    <${tagName} ${attributesHtml}>
-      ${childHtml}
-    </${tagName}>
-  `;
+  return dedent/*html*/`<${tagName} ${attributesHtml}>${childHtml}</${tagName}>`;
 }

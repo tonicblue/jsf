@@ -46,6 +46,8 @@ export type Schema = {
   allOf?: Schema[];
   not?: Schema[];
   const?: any;
+
+  items?: Schema;
 } & {[key in `$${string}` | `$${string}${ElementPosition}`]: any }
 
 export function renderSchema (frame: Frame) : string {
