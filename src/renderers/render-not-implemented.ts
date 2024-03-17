@@ -5,6 +5,6 @@ export default function renderNotImplemented (func: string, frame: Frame) {
     <p>
       <code>${func}()</code> not yet implemented yet
     </p>
-    <pre>${schemaPathStack.join('/')}</pre>
+    <pre>${frame.schemaPathStack.join('/')}</pre>
   `;
 }

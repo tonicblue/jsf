@@ -19,8 +19,6 @@ const testSchema = [
   }
 ]
 
-
-
 for (const schema of testSchema) {
   const frame = createFrame(schema, {});
   console.log(renderSchema(frame));

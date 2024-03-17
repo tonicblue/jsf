@@ -1,129 +1,104 @@
 import './style.css'
-import { renderSchema, resolveSchemaPath } from './schema';
+import { renderSchema } from './schema';
 import { createFrame } from './frame';
-import S from 'fluent-json-schema';
-import { renderHtmlNode } from './renderer';
+import ollama, { Message } from 'ollama';
+import { jsonCloser } from './json-closer.js';
+// import S from 'fluent-json-schema';
+// import { renderHtmlNode } from './renderer';
 
-const $app = document.querySelector('#app');
-const testSchema: any[] = [
-  S.object()
-    .title('Test object')
-    .prop('test1', S.string().title('Test 1').format(S.FORMATS.URI))
-    .prop('test2', S.string().title('Test 2').enum(['option 1', 'option 2', 'option 3']))
-    .valueOf(),
+const $app = document.querySelector('#app') as HTMLDivElement;
+const $log = document.querySelector('#log') as HTMLPreElement;
+const $prompt = document.querySelector('#prompt') as HTMLTextAreaElement;
+const $generate = document.querySelector('#generate') as HTMLButtonElement;
+const history: Exchange[] = [];
 
-  {
-    type: 'object',
-    title: 'Test object',
-    properties: {
-      test1: {
-        type: 'string',
-        title: 'Test 1',
-        format: 'uri'
-      },
-      test2: {
-        type: 'string',
-        title: 'Test 2',
-        enum: ['option 1', 'option 2', 'option 3'],
-        $input: {
-          type: 'radio'
-        }
-      }
-    },
-    allOf: [
+type Exchange = [prompt: string, response: string, $exchange: HTMLElement];
+
+function startExchange (prompt: string) {
+  const $exchange = document.createElement('article');
+  $exchange.setAttribute('role', 'log');
+  $exchange.innerHTML = /*html*/`
+    <blockquote actor="user">${prompt}</blockquote>
+    <blockquote actor="system"><pre></pre></blockquote>
+  `;
+  $log.appendChild($exchange);
+  $log.scrollTop = $log.scrollHeight;
+  history.push([prompt, '', $exchange]);
+}
+
+function writeToResponse (part: string) {
+  const [prompt, response, $exchange] = history.pop() ?? [];
+
+  if (prompt == null || response == null || $exchange == null)
+    throw Error(`No exchange started for part: ${part}`);
+
+  const $response = $exchange.querySelector('blockquote[actor=system] pre') as HTMLQuoteElement;
+  $response.insertAdjacentHTML('beforeend', part);
+  $log.scrollTop = $log.scrollHeight;
+  history.push([prompt, response + part, $exchange]);
+}
+
+function getLastResponse () {
+  return history[history.length - 1];
+}
+
+function getContext () {
+  return history.map(([prompt, response]) => Object([
+    { role: 'user', content: prompt },
+    { role: 'assistant', content: response }
+  ])).flat() as Message[];
+}
+
+function renderForm () {
+  try {
+    const schemaJson = jsonCloser(getLastResponse()[1]);
+    const schema = JSON.parse(schemaJson);
+    const frame = createFrame(schema);
+    $app.innerHTML = renderSchema(frame);
+  } catch (err) {
+    console.error(err.message, err);
+  }
+}
+
+async function generate () {
+  $prompt.readOnly = true;
+  const prompt = $prompt.value;
+  $prompt.value = '';
+
+  startExchange(prompt);
+
+  const response = await ollama.chat({
+    stream: true,
+    model: 'mistral:7b',
+    messages: [
+      ...getContext(),
       {
-        type: 'object',
-        title: 'Personal info',
-        properties: {
-          name: {
-            type: 'string',
-            title: 'Name'
-          },
-          age: {
-            type: 'integer',
-            title: 'Age',
-            minimum: 13,
-            maximum: 130,
-          }
-        }
-      },
-      {
-        type: 'object',
-        title: 'Address',
-        properties: {
-          streetAddress: {
-            type: 'string',
-            title: 'Street address'
-          },
-          postcode: {
-            type: 'string',
-            title: 'Postcode'
-          }
-        }
+        role: 'user',
+        content: `
+The word 'Form' means 'JSON Schema'.
+Always generate a detailed JSON schema.
+Always use titles on properties.
+Do not include buttons in the JSON schema.
+Respond using JSON.
+
+${prompt}`,
       }
     ],
-    oneOf: [
-      {
-        type: 'object',
-        title: 'Test other one',
-        properties: {
-          test_other_1_1: {
-            type: 'string',
-            title: 'Test other one 1'
-          },
-          test_other_1_2: {
-            type: 'string',
-            title: 'Test other one 2'
-          },
-        },
-      },
+  });
 
-      {
-        type: 'object',
-        title: 'Test other two',
-        properties: {
-          test_other_2_1: {
-            type: 'string',
-            title: 'Test other two 1'
-          },
-          test_other_2_2: {
-            type: 'string',
-            title: 'Test other two 2'
-          },
-        }
-      },
-    ]
+  for await (const part of response) {
+    writeToResponse(part.message.content);
+    renderForm();
   }
-];
 
-for (const schema of testSchema) {
-  const frame = createFrame(schema);
-  $app?.insertAdjacentHTML('beforeend', renderSchema(frame));
+  $app.insertAdjacentHTML('beforeend', `<button type="submit">Submit</button>`);
+  $prompt.readOnly = false;
+  $prompt.focus();
 }
 
-const resolveTests = [
-  {
-    schema: testSchema[1],
-    path: '/properties/test1',
-  },
-  {
-    schema: testSchema[1],
-    path: '/oneOf/1/properties/test_other_2_1',
-  },
-]
-
-for (const { schema, path } of resolveTests) {
-  const strippedPath = path.replace(/^\//, '');
-  const selector = `input[jsf-schema-path="${strippedPath}"],
-  [jsf-schema-path="${strippedPath}"] input`;
-  $app?.insertAdjacentHTML('beforeend', renderHtmlNode('pre', {},
-    `Resolving: ${path}\n`,
-    `Selector: ${selector}\n`,
-    `Resolved: `,
-    JSON.stringify(resolveSchemaPath(schema, path), null, 2),
-  ));
-
-  const input = document.querySelector(selector) as HTMLInputElement | null;
-  console.log(input);
-  if (input) input.style.outline = '3px solid #773377';
-}
+$prompt.addEventListener('keypress', (evt) => {
+  if (!evt.shiftKey && evt.key === 'Enter') {
+    evt.preventDefault();
+    generate().then();
+  }
+});

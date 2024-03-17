@@ -1,13 +1,43 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>JSF Demo</title>
-  </head>
-  <body>
-    <form id="app"></form>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JSF Demo</title>
+</head>
+
+<body>
+  <section>
+    <div id="log">
+      <article role="log">
+        <blockquote actor="system">
+          <strong>Hi there!</strong> I can generate forms given basic prompts. why not give it a go!
+        </blockquote>
+      </article>
+    </div>
+
+    <fieldset>
+      <label>
+        <textarea id="prompt" rows="5" placeholder="Enter your prompt here" autofocus></textarea>
+      </label>
+    </fieldset>
+
+    <div>
+      <!-- <button id="generate">Generate form</button> -->
+    </div>
+  </section>
+
+  <main>
+    <h1>
+      Generated form:
+    </h1>
+
+    <form id="app">
+      <strong>Once your form has been generated, it will appear here. Go on, give it a prompt!</strong>
+    </form>
+  </main>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
 </html>

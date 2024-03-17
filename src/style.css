@@ -13,18 +13,76 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+}
+
 body {
+  padding: 0;
   margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 0.8rem;
+}
+
+section, main {
+  padding: 0.8rem;
+  gap: 0.8rem;
+}
+
+section {
+  box-shadow: #00000053 5px -5px 10px;
+  display: flex;
+  flex-direction: column;
+
+  #log {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    overflow-y: overlay;
+    height: 0;
+
+    article {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.8rem;
+
+      blockquote {
+        padding: 0.8rem;
+        border: 1px solid rgba(255, 255, 255, 0.87);
+        border-radius: 0.8rem;
+        margin: 0;
+      }
+
+      blockquote[actor=system] {
+        margin-right: 2rem;
+        border-bottom-left-radius: 0;
+      }
+
+      blockquote[actor=user] {
+        margin-left: 2rem;
+        border-bottom-right-radius: 0;
+        background-color: #4488ee;
+      }
+    }
+  }
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
 }
 
 #app {
-  padding: 2rem;
-  max-width: 1280px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
 }
 
 fieldset {
@@ -47,16 +105,21 @@ legend:empty {
   display: none;
 }
 
+input, textarea {
+  padding: 0.4rem;
+}
+
 label {
   display: grid;
-  grid-template-columns: 1fr 3fr;
   gap: 0.8rem;
+}
 
-  > span {
-    padding: 0.4rem
-  }
+label:has(> span) {
+  grid-template-columns: 1fr 3fr;
+}
 
-  input {
-    padding: 0.4rem;
-  }
+button {
+  padding: 0.8rem;
+  font-weight: bold;
+  border: 1px solid rgba(255, 255, 255, 0.87);
 }
