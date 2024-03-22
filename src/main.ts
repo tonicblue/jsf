@@ -106,7 +106,15 @@ async function generate () {
   $prompt.focus();
 }
 
+document.querySelectorAll('.auto-grow').forEach(element => {
+  element.addEventListener('input', ({target}) => {
+    target.style.height = "5px";
+    target.style.height = ($prompt.scrollHeight) + "px";
+  });
+})
+
 $prompt.addEventListener('keypress', (evt) => {
+  
   if (!evt.shiftKey && evt.key === 'Enter') {
     evt.preventDefault();
     generate().then();

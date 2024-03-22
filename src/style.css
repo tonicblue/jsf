@@ -119,6 +119,13 @@ input, textarea, select {
   padding: 0.8rem;
 }
 
+textarea.auto-grow {
+  resize: none;
+  overflow: hidden;
+  min-height: 50px;
+  max-height: 50vh;
+}
+
 label {
   display: grid;
   gap: 0.8rem;
